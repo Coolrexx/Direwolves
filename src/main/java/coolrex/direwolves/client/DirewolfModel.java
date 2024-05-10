@@ -113,6 +113,8 @@ public class DirewolfModel<T extends DirewolfEntity> extends HierarchicalModel<T
 
         this.animate(((DirewolfEntity)entity).idleAnimationState, DirewolfAnimations.idle, ageInTicks, 0.85f);
         this.animate(((DirewolfEntity)entity).sitAnimationState, DirewolfAnimations.sit, ageInTicks, 1.0f);
+        //this.animate(((DirewolfEntity)entity).angryAnimationState, DirewolfAnimations.angry, ageInTicks, 1.0f);
+        this.animate(((DirewolfEntity)entity).attackAnimationState, DirewolfAnimations.attack, ageInTicks, 1.0f);
     }
 
     private void applyHeadRotation(float pNetHeadYaw, float pHeadPitch, float pAgeInTicks) {
