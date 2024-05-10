@@ -39,7 +39,7 @@ public class DirewolfModel<T extends DirewolfEntity> extends HierarchicalModel<T
 
         PartDefinition root = partdefinition.addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-        PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.offset(0.0F, -15.0F, 2.0F));
+        PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.offset(0.0F, -15.0F, -1.0F));
 
         PartDefinition torso = body.addOrReplaceChild("torso", CubeListBuilder.create().texOffs(0, 28).addBox(-6.0F, -6.25F, 5.0F, 12.0F, 7.0F, 5.0F, new CubeDeformation(0.0F))
                 .texOffs(36, 0).addBox(-6.0F, -6.25F, -6.0F, 12.0F, 12.0F, 11.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.25F, -5.0F));
@@ -93,13 +93,13 @@ public class DirewolfModel<T extends DirewolfEntity> extends HierarchicalModel<T
 
         PartDefinition cube_r3 = tail3.addOrReplaceChild("cube_r3", CubeListBuilder.create().texOffs(11, 55).addBox(-2.0F, -1.0F, -5.0F, 4.0F, 4.0F, 5.0F, new CubeDeformation(0.02F)), PartPose.offsetAndRotation(0.0F, 0.0F, 0.0F, 1.5708F, 0.0F, 0.0F));
 
-        PartDefinition leftBackleg = root.addOrReplaceChild("leftBackleg", CubeListBuilder.create().texOffs(0, 40).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(3.0F, -10.0F, 12.0F));
+        PartDefinition leftBackleg = root.addOrReplaceChild("leftBackleg", CubeListBuilder.create().texOffs(0, 40).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(3.0F, -10.0F, 9.0F));
 
-        PartDefinition rightBackleg = root.addOrReplaceChild("rightBackleg", CubeListBuilder.create().texOffs(0, 40).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-3.0F, -10.0F, 12.0F));
+        PartDefinition rightBackleg = root.addOrReplaceChild("rightBackleg", CubeListBuilder.create().texOffs(0, 40).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-3.0F, -10.0F, 9.0F));
 
-        PartDefinition leftFrontleg = root.addOrReplaceChild("leftFrontleg", CubeListBuilder.create().texOffs(16, 40).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(3.0F, -10.0F, -6.0F));
+        PartDefinition leftFrontleg = root.addOrReplaceChild("leftFrontleg", CubeListBuilder.create().texOffs(16, 40).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(3.0F, -10.0F, -9.0F));
 
-        PartDefinition rightFrontleg = root.addOrReplaceChild("rightFrontleg", CubeListBuilder.create().texOffs(16, 40).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-3.0F, -10.0F, -6.0F));
+        PartDefinition rightFrontleg = root.addOrReplaceChild("rightFrontleg", CubeListBuilder.create().texOffs(16, 40).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 10.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-3.0F, -10.0F, -9.0F));
 
         return LayerDefinition.create(meshdefinition, 92, 64);
     }
@@ -112,6 +112,7 @@ public class DirewolfModel<T extends DirewolfEntity> extends HierarchicalModel<T
         this.animateWalk(DirewolfAnimations.walk, limbSwing, limbSwingAmount, 2F, 2.5F);
 
         this.animate(((DirewolfEntity)entity).idleAnimationState, DirewolfAnimations.idle, ageInTicks, 0.85f);
+        this.animate(((DirewolfEntity)entity).sitAnimationState, DirewolfAnimations.sit, ageInTicks, 1.0f);
     }
 
     private void applyHeadRotation(float pNetHeadYaw, float pHeadPitch, float pAgeInTicks) {

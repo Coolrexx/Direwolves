@@ -10,6 +10,6 @@ import net.minecraftforge.registries.RegistryObject;
 public class DirewolvesItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Direwolves.MOD_ID);
 
-    public static final RegistryObject<Item> DIREWOLF_SPAWN_EGG = ITEMS.register("direwolf_spawn_egg", () -> new ForgeSpawnEggItem(DirewolvesEntities.DIREWOLF, 0x330e04, 0xc9a983, new Item.Properties()));
+    public static final RegistryObject<Item> DIREWOLF_SPAWN_EGG = ITEMS.register("direwolf_spawn_egg", () -> new ForgeSpawnEggItem(DirewolvesEntities.DIREWOLF, 0x9a9a9a, 0x7a5f48, new Item.Properties()));
 
 }
