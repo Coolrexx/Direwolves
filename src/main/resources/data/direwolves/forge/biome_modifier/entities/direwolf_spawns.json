@@ -3,7 +3,7 @@
   "biomes": "#direwolves:direwolf_spawns_in",
   "spawners": {
     "type": "direwolves:direwolf",
-    "weight": 100,
+    "weight": 2,
     "minCount": 1,
     "maxCount": 1
   }

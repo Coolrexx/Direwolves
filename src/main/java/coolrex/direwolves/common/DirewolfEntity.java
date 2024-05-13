@@ -30,8 +30,11 @@ import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.*;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -49,6 +52,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     @Nullable
     private UUID persistentAngerTarget;
     public boolean isJumping;
+    public boolean isSprinting;
     public boolean playerJump;
 
     public DirewolfEntity(EntityType<? extends TamableAnimal> entityType, Level level) {
@@ -105,9 +109,10 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     /*TODO:
     figure out why sitting is delayed
     figure out another way of setting up mount & sitting (shift + leftclick to mount didnt work for now obvious reasons)
-    add angry static animation & other idle animations
-    figure out why spawning isnt working
-    make direwolf float/swim in water while mounted rather than sink*/
+    implement idle animations
+    make direwolf float/swim in water while mounted rather than sink
+    modify spawning so direwolves dont spawn on chunkgen & only in full and new moons
+    */
 
 
 /*    @Override
@@ -198,6 +203,14 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
         return this.playerJump;
     }
 
+    public void setIsSprinting(boolean b) {
+        this.isSprinting = b;
+    }
+
+    public boolean isSprinting() {
+        return this.isSprinting;
+    }
+
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
@@ -268,13 +281,30 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     }
 
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor levelAccessor, DifficultyInstance instance, MobSpawnType spawnType, @Nullable SpawnGroupData groupData, @Nullable CompoundTag tag) {
-        DirewolfEntity.Variant variant = getVariant();
+        DirewolfEntity.Variant variant = DirewolfEntity.Variant.byId(this.randomVariant(0, 2));
+        setVariant(variant);
 
-        DirewolfEntity.Variant.byId(this.randomVariant(0, 2));
-
-        this.setVariant(variant);
         return super.finalizeSpawn(levelAccessor, instance, spawnType, groupData, tag);
     }
+
+/*    protected static boolean isBrightEnoughToSpawn(BlockAndTintGetter blockLight, BlockPos pos) {
+        return blockLight.getRawBrightness(pos, 0) < 8;
+    }*/
+
+/*    public static boolean isDarkEnoughToSpawn(ServerLevelAccessor level, BlockPos pos, RandomSource random) {
+        if (level.getBrightness(LightLayer.SKY, pos) > random.nextInt(32)) {
+            return false;
+        } else {
+            DimensionType dimensiontype = level.dimensionType();
+            int i = dimensiontype.monsterSpawnBlockLightLimit();
+            if (i < 15 && level.getBrightness(LightLayer.BLOCK, pos) > i) {
+                return false;
+            } else {
+                int j = level.getLevel().isThundering() ? level.getMaxLocalRawBrightness(pos, 10) : level.getMaxLocalRawBrightness(pos);
+                return j <= dimensiontype.monsterSpawnLightTest().sample(random);
+            }
+        }
+    }*/
 
     //Mountable
     protected void positionRider(Entity entity, Entity.MoveFunction move) {
@@ -324,6 +354,10 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
             } else {
                 moveSpeed = 0.05;
             }
+            this.setDeltaMovement(this.getDeltaMovement().add(moveX * moveSpeed, 0, moveZ * moveSpeed));
+        } else if (player.isSprinting()){
+            moveSpeed = 0.35;
+            this.setIsSprinting(true);
             this.setDeltaMovement(this.getDeltaMovement().add(moveX * moveSpeed, 0, moveZ * moveSpeed));
         } else {
             moveSpeed = 0.2;
@@ -496,6 +530,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
                 if(isTimeToAttack()) {
                     this.mob.getLookControl().setLookAt(target.getX(), target.getEyeY(), target.getZ());
                     performAttack(target);
+                    entity.playSound(SoundEvents.EVOKER_FANGS_ATTACK, 0.6F, 1.0F);
                 }
             } else {
                 resetAttackCooldown();
@@ -587,6 +622,9 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     private int attackAnimationTimeout = 0;
     public final AnimationState angryAnimationState = new AnimationState();
 
+    public final AnimationState scratchIdleState = new AnimationState();
+    private int scratchIdleTimeout = 0;
+
     @Override
     public void tick() {
         super.tick();
@@ -615,11 +653,12 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
             this.sitAnimationState.stop();
         }
 
-/*        if (this.isAngry()) {
+
+        if (this.isAngry() || this.isAttacking()) {
             angryAnimationState.start(this.tickCount);
         } else {
             this.angryAnimationState.stop();
-        }*/
+        }
 
         if(this.isAttacking()) {
             if (this.attackAnimationTimeout <= 0) {

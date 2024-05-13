@@ -109,12 +109,17 @@ public class DirewolfModel<T extends DirewolfEntity> extends HierarchicalModel<T
         this.root().getAllParts().forEach(ModelPart::resetPose);
         this.applyHeadRotation(netHeadYaw, headPitch, ageInTicks);
 
-        this.animateWalk(DirewolfAnimations.walk, limbSwing, limbSwingAmount, 2F, 2.5F);
+        if (((DirewolfEntity)entity).isSprinting()) {
+            this.animateWalk(DirewolfAnimations.run, limbSwing, limbSwingAmount, 2F, 2.5F);
+        } else {
+            this.animateWalk(DirewolfAnimations.walk, limbSwing, limbSwingAmount, 2F, 2.5F);
+        }
 
         this.animate(((DirewolfEntity)entity).idleAnimationState, DirewolfAnimations.idle, ageInTicks, 0.85f);
         this.animate(((DirewolfEntity)entity).sitAnimationState, DirewolfAnimations.sit, ageInTicks, 1.0f);
-        //this.animate(((DirewolfEntity)entity).angryAnimationState, DirewolfAnimations.angry, ageInTicks, 1.0f);
+        this.animate(((DirewolfEntity)entity).angryAnimationState, DirewolfAnimations.angry, ageInTicks, 1.0f);
         this.animate(((DirewolfEntity)entity).attackAnimationState, DirewolfAnimations.attack, ageInTicks, 1.0f);
+        //this.animate(((DirewolfEntity)entity).scratchIdleState, DirewolfAnimations.ninni_scratch, ageInTicks, 1.0f);
     }
 
     private void applyHeadRotation(float pNetHeadYaw, float pHeadPitch, float pAgeInTicks) {
