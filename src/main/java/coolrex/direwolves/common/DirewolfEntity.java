@@ -109,7 +109,6 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     /*TODO:
     figure out why sitting is delayed
     figure out another way of setting up mount & sitting (shift + leftclick to mount didnt work for now obvious reasons)
-    implement idle animations
     make direwolf float/swim in water while mounted rather than sink
     modify spawning so direwolves dont spawn on chunkgen & only in full and new moons
     */
@@ -624,6 +623,8 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
 
     public final AnimationState scratchIdleState = new AnimationState();
     private int scratchIdleTimeout = 0;
+    public final AnimationState laydownIdleState = new AnimationState();
+    private int laydownIdleTimeout = 0;
 
     @Override
     public void tick() {
@@ -635,6 +636,8 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     }
 
     private void setupAnimationStates() {
+        float f = random.nextFloat();
+
         if(this.idleAnimationTimeout <= 0) {
             this.idleAnimationTimeout = 51;
             this.idleAnimationState.start(this.tickCount);
@@ -653,9 +656,30 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
             this.sitAnimationState.stop();
         }
 
+        if (this.sitAnimationState.isStarted() && !this.laydownIdleState.isStarted()) {
+            if (f >= 0.0f && f <= 0.2f && !this.scratchIdleState.isStarted()) {
+                this.scratchIdleTimeout = 160;
+                this.scratchIdleState.start(this.tickCount);
+            } else if (this.scratchIdleTimeout >= 0) {
+                --this.scratchIdleTimeout;
+            } else {
+                this.scratchIdleState.stop();
+            }
+        }
+
+        if (this.sitAnimationState.isStarted() && !this.scratchIdleState.isStarted()) {
+            if (f >= 0.3f && f <= 0.4f && !this.laydownIdleState.isStarted()) {
+                this.laydownIdleTimeout  = 480;
+                this.laydownIdleState.start(this.tickCount);
+            } else if (this.laydownIdleTimeout >= 0) {
+                --this.laydownIdleTimeout;
+            } else {
+                this.laydownIdleState.stop();
+            }
+        }
 
         if (this.isAngry() || this.isAttacking()) {
-            angryAnimationState.start(this.tickCount);
+            this.angryAnimationState.start(this.tickCount);
         } else {
             this.angryAnimationState.stop();
         }

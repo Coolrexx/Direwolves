@@ -1256,7 +1256,7 @@ public class DirewolfAnimations {
                 ))
                 .build();
 
-        public static final AnimationDefinition ninni_scratch = AnimationDefinition.Builder.withLength(4.0F).looping()
+        public static final AnimationDefinition ninni_scratch = AnimationDefinition.Builder.withLength(4.0F)
                 .addAnimation("torso", new AnimationChannel(AnimationChannel.Targets.ROTATION,
                         new Keyframe(0.3333F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
                         new Keyframe(0.625F, KeyframeAnimations.degreeVec(0.0F, 30.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
@@ -1401,7 +1401,7 @@ public class DirewolfAnimations {
                 ))
                 .build();
 
-        public static final AnimationDefinition ninni_laydown = AnimationDefinition.Builder.withLength(12.0F).looping()
+        public static final AnimationDefinition ninni_laydown = AnimationDefinition.Builder.withLength(12.0F)
                 .addAnimation("body", new AnimationChannel(AnimationChannel.Targets.ROTATION,
                         new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
                         new Keyframe(0.5F, KeyframeAnimations.degreeVec(15.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
