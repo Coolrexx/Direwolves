@@ -246,7 +246,9 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     public enum Variant {
         PALE(0),
         CYON(1),
-        SNOW(2);
+        SNOW(2),
+        BLACK(3),
+        SPEC(4);
 
         private static final DirewolfEntity.Variant[] BY_ID = Arrays.stream(values()).sorted(Comparator.comparingInt(DirewolfEntity.Variant::getId)).toArray(DirewolfEntity.Variant[]::new);
         private final int id;
@@ -280,7 +282,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     }
 
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor levelAccessor, DifficultyInstance instance, MobSpawnType spawnType, @Nullable SpawnGroupData groupData, @Nullable CompoundTag tag) {
-        DirewolfEntity.Variant variant = DirewolfEntity.Variant.byId(this.randomVariant(0, 2));
+        DirewolfEntity.Variant variant = DirewolfEntity.Variant.byId(this.randomVariant(0, 4));
         setVariant(variant);
 
         return super.finalizeSpawn(levelAccessor, instance, spawnType, groupData, tag);
@@ -654,6 +656,8 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
             }
         } else {
             this.sitAnimationState.stop();
+            this.scratchIdleState.stop();
+            this.laydownIdleState.stop();
         }
 
         if (this.sitAnimationState.isStarted() && !this.laydownIdleState.isStarted()) {
@@ -668,7 +672,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
         }
 
         if (this.sitAnimationState.isStarted() && !this.scratchIdleState.isStarted()) {
-            if (f >= 0.3f && f <= 0.4f && !this.laydownIdleState.isStarted()) {
+            if (f >= 0.3f && f <= 1.0f && !this.laydownIdleState.isStarted() && this.sitAnimationTimeout <= 0) {
                 this.laydownIdleTimeout  = 480;
                 this.laydownIdleState.start(this.tickCount);
             } else if (this.laydownIdleTimeout >= 0) {

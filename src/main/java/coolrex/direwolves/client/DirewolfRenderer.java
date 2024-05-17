@@ -24,6 +24,8 @@ public class DirewolfRenderer extends MobRenderer<DirewolfEntity, DirewolfModel<
         map.put(DirewolfEntity.Variant.PALE, new ResourceLocation(Direwolves.MOD_ID, "textures/entity/direwolf_pale.png"));
         map.put(DirewolfEntity.Variant.CYON, new ResourceLocation(Direwolves.MOD_ID, "textures/entity/direwolf_cyon.png"));
         map.put(DirewolfEntity.Variant.SNOW, new ResourceLocation(Direwolves.MOD_ID, "textures/entity/direwolf_snow.png"));
+        map.put(DirewolfEntity.Variant.BLACK, new ResourceLocation(Direwolves.MOD_ID, "textures/entity/direwolf_black.png"));
+        map.put(DirewolfEntity.Variant.SPEC, new ResourceLocation(Direwolves.MOD_ID, "textures/entity/direwolf_spec.png"));
     });
 
     @Override
