@@ -1,6 +1,7 @@
 package coolrex.direwolves.common;
 
 import coolrex.direwolves.common.goals.DirewolfMeleeAttackGoal;
+import coolrex.direwolves.common.goals.RiddenFloatGoal;
 import coolrex.direwolves.registry.DirewolvesEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -62,6 +63,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
 
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new RiddenFloatGoal(this));
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(2, new ClimbOnTopOfPowderSnowGoal(this, this.level()));
         this.goalSelector.addGoal(2, new LookAtPlayerGoal(this, Player.class, 6.0F));
