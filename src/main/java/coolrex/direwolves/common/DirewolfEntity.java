@@ -1,5 +1,6 @@
 package coolrex.direwolves.common;
 
+import coolrex.direwolves.common.goals.DirewolfMeleeAttackGoal;
 import coolrex.direwolves.registry.DirewolvesEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -64,7 +65,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(2, new ClimbOnTopOfPowderSnowGoal(this, this.level()));
         this.goalSelector.addGoal(2, new LookAtPlayerGoal(this, Player.class, 6.0F));
-        this.goalSelector.addGoal(2, new DirewolfEntity.DirewolfMeleeAttackGoal(this, 1.75D, true));
+        this.goalSelector.addGoal(2, new DirewolfMeleeAttackGoal(this, 1.75D, true));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, false));
         this.goalSelector.addGoal(4, new LeapAtTargetGoal(this, 0.4F));
         this.goalSelector.addGoal(5, new BreedGoal(this, 1.0D));
@@ -79,7 +80,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Animal.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.25f).add(Attributes.MAX_HEALTH, 30D).add(Attributes.ATTACK_DAMAGE, 7.5D);
+        return Animal.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.25f).add(Attributes.MAX_HEALTH, 45D).add(Attributes.ATTACK_DAMAGE, 7.5D);
     }
 
     @Nullable
@@ -449,7 +450,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     }
 
     public boolean causeFallDamage(float entityHeight, float damageHeight, DamageSource fallDamage) {
-        if (entityHeight > 1.0F) {
+        if (entityHeight > 1.5F) {
             this.playSound(SoundEvents.HORSE_LAND, 0.4F, 1.0F);
         }
 
@@ -500,94 +501,6 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
         this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
     }
 
-    public class DirewolfMeleeAttackGoal extends MeleeAttackGoal {
-        private final DirewolfEntity entity;
-        private int attackDelay = 20;
-        private int ticksUntilNextAttack = 20;
-        private boolean shouldCountTillNextAttack = false;
-
-        DirewolfMeleeAttackGoal(PathfinderMob mob, double speedModifier, boolean followTarget) {
-            super(mob, speedModifier, followTarget);
-            entity = ((DirewolfEntity)mob);
-        }
-
-        @Override
-        public void start() {
-            super.start();
-            attackDelay = 20;
-            ticksUntilNextAttack = 20;
-        }
-
-
-        @Override
-        protected void checkAndPerformAttack(LivingEntity target, double distToTarget) {
-            if (targetInAttackDist(target, distToTarget)) {
-                shouldCountTillNextAttack = true;
-
-                if(isTimeToStartAttackAnimation()) {
-                    entity.setAttacking(true);
-                }
-
-                if(isTimeToAttack()) {
-                    this.mob.getLookControl().setLookAt(target.getX(), target.getEyeY(), target.getZ());
-                    performAttack(target);
-                    entity.playSound(SoundEvents.EVOKER_FANGS_ATTACK, 0.6F, 1.0F);
-                }
-            } else {
-                resetAttackCooldown();
-                shouldCountTillNextAttack = false;
-                entity.setAttacking(false);
-                entity.attackAnimationTimeout = 0;
-            }
-        }
-
-        private boolean targetInAttackDist(LivingEntity target, double distToTarget) {
-            return distToTarget <= this.getAttackReachSqr(target);
-        }
-
-        protected double getAttackReachSqr(LivingEntity target) {
-            return (double)(this.mob.getBbWidth() * 4.0F * this.mob.getBbWidth() * 4.0F + target.getBbWidth());
-        }
-
-        protected void resetAttackCooldown() {
-            this.ticksUntilNextAttack = this.adjustedTickDelay(attackDelay * 2);
-        }
-
-        protected boolean isTimeToAttack() {
-            return this.ticksUntilNextAttack <= 0;
-        }
-
-        protected boolean isTimeToStartAttackAnimation() {
-            return this.ticksUntilNextAttack <= attackDelay;
-        }
-
-        protected int getTicksUntilNextAttack() {
-            return this.ticksUntilNextAttack;
-        }
-
-
-        protected void performAttack(LivingEntity target) {
-            this.resetAttackCooldown();
-            this.mob.swing(InteractionHand.MAIN_HAND);
-            this.mob.doHurtTarget(target);
-        }
-
-        @Override
-        public void tick() {
-            super.tick();
-            if(shouldCountTillNextAttack) {
-                this.ticksUntilNextAttack = Math.max(this.ticksUntilNextAttack - 1, 0);
-            }
-        }
-
-        @Override
-        public void stop() {
-            entity.setAttacking(false);
-            super.stop();
-        }
-
-    }
-
     public boolean wantsToAttack(LivingEntity entity, LivingEntity player) {
         if (!(entity instanceof Creeper) && !(entity instanceof Ghast)) {
             if (entity instanceof DirewolfEntity) {
@@ -620,7 +533,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     public final AnimationState sitAnimationState = new AnimationState();
     private int sitAnimationTimeout = 0;
     public final AnimationState attackAnimationState = new AnimationState();
-    private int attackAnimationTimeout = 0;
+    public int attackAnimationTimeout = 0;
     public final AnimationState angryAnimationState = new AnimationState();
 
     public final AnimationState scratchIdleState = new AnimationState();
@@ -661,7 +574,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
         }
 
         if (this.sitAnimationState.isStarted() && !this.laydownIdleState.isStarted()) {
-            if (f >= 0.0f && f <= 0.2f && !this.scratchIdleState.isStarted()) {
+            if (f <= 0.1f && !this.scratchIdleState.isStarted()) {
                 this.scratchIdleTimeout = 160;
                 this.scratchIdleState.start(this.tickCount);
             } else if (this.scratchIdleTimeout >= 0) {
@@ -672,7 +585,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
         }
 
         if (this.sitAnimationState.isStarted() && !this.scratchIdleState.isStarted()) {
-            if (f >= 0.3f && f <= 1.0f && !this.laydownIdleState.isStarted() && this.sitAnimationTimeout <= 0) {
+            if (f <= 1.0f && !this.laydownIdleState.isStarted() && this.sitAnimationTimeout <= 0) {
                 this.laydownIdleTimeout  = 480;
                 this.laydownIdleState.start(this.tickCount);
             } else if (this.laydownIdleTimeout >= 0) {
