@@ -113,56 +113,47 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     figure out why sitting is delayed
     figure out another way of setting up mount & sitting (shift + leftclick to mount didnt work for now obvious reasons)
     make direwolf float/swim in water while mounted rather than sink
-    modify spawning so direwolves dont spawn on chunkgen & only in full and new moons
+    finalise spawning biomes
+    make direwolves spawn with a wolf pack rarely
     */
 
-
-/*    @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
-        player.setYRot(this.getYRot());
-        player.setXRot(this.getXRot());
-        player.startRiding(this);
-        this.navigation.stop();
-
-        return InteractionResult.SUCCESS;
-    }*/
-
-    @Override
-    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        InteractionResult interactionresult = super.mobInteract(player, hand);
         ItemStack stack = player.getItemInHand(hand);
-        Item item = stack.getItem();
+
         if (this.isTame()) {
             if (this.isFood(stack) && this.getHealth() < this.getMaxHealth()) {
+                //food
                 this.heal((float)stack.getFoodProperties(this).getNutrition());
                 if (!player.getAbilities().instabuild) {
                     stack.shrink(1);
                 }
                 this.gameEvent(GameEvent.EAT, this);
                 return InteractionResult.SUCCESS;
+            } else if (!interactionresult.consumesAction() && player.isShiftKeyDown() && this.isOwnedBy(player)) {
+                //sit
+                this.setOrderedToSit(!this.isOrderedToSit());
+                this.jumping = false;
+                this.navigation.stop();
+                return InteractionResult.SUCCESS;
+            } else if (!interactionresult.consumesAction() && this.isOwnedBy(player) && !this.isInSittingPose() && !this.isBaby()) {
+                //ride
+                player.setYRot(this.getYRot());
+                player.setXRot(this.getXRot());
+                player.startRiding(this);
+                this.navigation.stop();
+                return InteractionResult.SUCCESS;
             } else {
-                InteractionResult interactionresult = super.mobInteract(player, hand);
-                if ((!interactionresult.consumesAction() || this.isBaby()) && this.isOwnedBy(player) && player.isShiftKeyDown()) {
-                    this.setOrderedToSit(!this.isOrderedToSit());
-                    this.jumping = false;
-                    this.navigation.stop();
-                    return InteractionResult.SUCCESS;
-                } else if ((!interactionresult.consumesAction() || !this.isBaby()) && this.isOwnedBy(player) && !this.isInSittingPose()){
-                    player.setYRot(this.getYRot());
-                    player.setXRot(this.getXRot());
-                    player.startRiding(this);
-                    this.navigation.stop();
-
-                    return InteractionResult.SUCCESS;
-                } else {
-                    return interactionresult;
-                }
+                //interaction does nothing?
+                return interactionresult;
             }
-        }
-        else {
+        } else {
+            //not tamed
             if (stack.is(Items.BONE) && !this.isAngry()) {
                 if (!player.getAbilities().instabuild) {
                     stack.shrink(1);
                 }
+
                 if (this.random.nextInt(3) == 0 && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, player)) {
                     this.tame(player);
                     this.navigation.stop();
@@ -176,7 +167,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
                 this.setPersistenceRequired();
                 return InteractionResult.SUCCESS;
             } else {
-                return super.mobInteract(player, hand);
+                return interactionresult;
             }
         }
     }
@@ -582,6 +573,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
         }
 
         if(this.isInSittingPose()) {
+            this.idleAnimationState.stop();
             if (this.sitAnimationTimeout <= 0) {
                 this.sitAnimationTimeout = 79;
                 this.sitAnimationState.start(this.tickCount);

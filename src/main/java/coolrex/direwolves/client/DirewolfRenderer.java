@@ -36,7 +36,7 @@ public class DirewolfRenderer extends MobRenderer<DirewolfEntity, DirewolfModel<
     @Override
     public void render(DirewolfEntity entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         if (entity.isBaby()) {
-            poseStack.scale(0.9f, 0.9f, 0.9f);
+            poseStack.scale(0.8f, 0.8f, 0.8f);
         } else {
             poseStack.scale(1.4f, 1.4f, 1.4f);
         }

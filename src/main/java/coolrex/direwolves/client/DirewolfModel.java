@@ -110,6 +110,7 @@ public class DirewolfModel<T extends DirewolfEntity> extends HierarchicalModel<T
     public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         this.root().getAllParts().forEach(ModelPart::resetPose);
         this.applyHeadRotation(netHeadYaw, headPitch, ageInTicks);
+        this.applyTailRotation(entity);
 
         if (((DirewolfEntity)entity).isSprinting()) {
             this.animateWalk(DirewolfAnimations.run, limbSwing, limbSwingAmount, 2F, 2.5F);
@@ -123,6 +124,14 @@ public class DirewolfModel<T extends DirewolfEntity> extends HierarchicalModel<T
         this.animate(((DirewolfEntity)entity).attackAnimationState, DirewolfAnimations.attack, ageInTicks, 1.0f);
         this.animate(((DirewolfEntity)entity).scratchIdleState, DirewolfAnimations.ninni_scratch, ageInTicks, 1.0f);
         this.animate(((DirewolfEntity)entity).laydownIdleState, DirewolfAnimations.ninni_laydown, ageInTicks, 1.0f);
+    }
+
+    public void applyTailRotation (T entity) {
+        if (entity.isTame()) {
+            this.tail.xRot = 0.1f -((entity.getMaxHealth() - entity.getHealth()) * 0.02f);
+        } else {
+            this.tail.xRot = 0;
+        }
     }
 
     private void applyHeadRotation(float pNetHeadYaw, float pHeadPitch, float pAgeInTicks) {
