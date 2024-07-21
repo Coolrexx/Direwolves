@@ -34,14 +34,16 @@ public class Direwolves {
 
     public Direwolves()
     {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(this::addCreative);
-        modEventBus.addListener(this::registerEntityAttributes);
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus forgeBus = MinecraftForge.EVENT_BUS;
+        bus.addListener(this::commonSetup);
+        bus.addListener(this::addCreative);
+        bus.addListener(this::registerSpawnPlacements);
+        bus.addListener(this::registerEntityAttributes);
 
         MinecraftForge.EVENT_BUS.register(this);
-        DirewolvesEntities.ENTITIES.register(modEventBus);
-        DirewolvesItems.ITEMS.register(modEventBus);
+        DirewolvesEntities.ENTITIES.register(bus);
+        DirewolvesItems.ITEMS.register(bus);
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event)
@@ -55,8 +57,8 @@ public class Direwolves {
     }
 
     @SubscribeEvent
-    public static void registerSpawnPlacements(SpawnPlacementRegisterEvent event) {
-        event.register(DirewolvesEntities.DIREWOLF.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.WORLD_SURFACE_WG, DirewolfEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.AND);
+    public void registerSpawnPlacements(SpawnPlacementRegisterEvent event) {
+        event.register(DirewolvesEntities.DIREWOLF.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.WORLD_SURFACE, DirewolfEntity::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

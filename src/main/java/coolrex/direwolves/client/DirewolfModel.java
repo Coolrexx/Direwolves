@@ -49,7 +49,7 @@ public class DirewolfModel<T extends DirewolfEntity> extends HierarchicalModel<T
         PartDefinition head = torso.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.5F, -4.0F, -5.0F, 9.0F, 8.0F, 5.0F, new CubeDeformation(0.0F))
                 .texOffs(28, 4).mirror().addBox(-7.5F, -2.0F, -1.0F, 3.0F, 6.0F, 0.0F, new CubeDeformation(0.0F)).mirror(false)
                 .texOffs(28, 4).addBox(4.5F, -2.0F, -1.0F, 3.0F, 6.0F, 0.0F, new CubeDeformation(0.0F))
-                .texOffs(13, 13).addBox(-2.0F, 1.0F, -5.0F, 4.0F, 3.0F, 0.0F, new CubeDeformation(-0.01F)), PartPose.offset(0.0F, 0.25F, -6.0F));
+                .texOffs(14, 13).addBox(-2.0F, 1.0F, -5.0F, 4.0F, 3.0F, 0.0F, new CubeDeformation(-0.01F)), PartPose.offset(0.0F, 0.25F, -6.0F));
 
         PartDefinition leftEyebrow = head.addOrReplaceChild("leftEyebrow", CubeListBuilder.create().texOffs(0, 3).mirror().addBox(-1.0F, -2.5F, 0.0F, 2.0F, 2.0F, 0.0F, new CubeDeformation(0.01F)).mirror(false), PartPose.offset(3.25F, -0.5F, -4.0F));
 
@@ -69,16 +69,18 @@ public class DirewolfModel<T extends DirewolfEntity> extends HierarchicalModel<T
 
         PartDefinition snout = head.addOrReplaceChild("snout", CubeListBuilder.create(), PartPose.offset(0.0F, -1.0F, -5.0F));
 
-        PartDefinition nose = snout.addOrReplaceChild("nose", CubeListBuilder.create().texOffs(0, 13).addBox(-2.0F, -1.0F, -5.0F, 4.0F, 4.0F, 5.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, 1.0F, 0.0F));
+        PartDefinition nose = snout.addOrReplaceChild("nose", CubeListBuilder.create().texOffs(0, 13).addBox(-2.0F, -1.0F, -5.0F, 4.0F, 4.0F, 6.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, 1.0F, 0.0F));
 
         PartDefinition topteeth = nose.addOrReplaceChild("topteeth", CubeListBuilder.create().texOffs(16, 20).addBox(-2.0F, -1.0F, -2.5F, 4.0F, 2.0F, 5.0F, new CubeDeformation(-0.01F)), PartPose.offset(0.0F, 3.0F, -2.5F));
 
         PartDefinition jaw = snout.addOrReplaceChild("jaw", CubeListBuilder.create().texOffs(18, 13).addBox(-2.0F, -0.5F, -5.0F, 4.0F, 1.0F, 5.0F, new CubeDeformation(0.0F))
-                .texOffs(0, 22).addBox(-2.0F, -1.5F, -4.5F, 4.0F, 1.0F, 4.0F, new CubeDeformation(-0.01F)), PartPose.offset(0.0F, 4.5F, 0.0F));
+                .texOffs(0, 23).addBox(-2.0F, -1.5F, -4.5F, 4.0F, 1.0F, 4.0F, new CubeDeformation(-0.01F)), PartPose.offset(0.0F, 4.5F, 0.0F));
 
         PartDefinition tongue = jaw.addOrReplaceChild("tongue", CubeListBuilder.create().texOffs(30, 1).addBox(-1.5F, 0.0F, -4.0F, 3.0F, 0.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -0.5F, 0.0F));
 
         PartDefinition waist = body.addOrReplaceChild("waist", CubeListBuilder.create().texOffs(34, 23).addBox(-5.0F, -4.5F, -1.0F, 10.0F, 9.0F, 13.0F, new CubeDeformation(0.01F)), PartPose.offset(0.0F, 0.5F, 0.0F));
+
+        PartDefinition rider = waist.addOrReplaceChild("rider", CubeListBuilder.create(), PartPose.offset(0.0F, -4.5F, 5.5F));
 
         PartDefinition tail = waist.addOrReplaceChild("tail", CubeListBuilder.create(), PartPose.offset(0.0F, -1.5F, 11.0F));
 

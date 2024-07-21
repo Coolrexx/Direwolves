@@ -32,7 +32,6 @@ import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -100,6 +99,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
             direwolf.setTame(true);
         }
 
+        this.setPersistenceRequired();
         return direwolf;
     }
 
@@ -173,6 +173,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
                     this.level().broadcastEntityEvent(this, (byte)6);
                 }
 
+                this.setPersistenceRequired();
                 return InteractionResult.SUCCESS;
             } else {
                 return super.mobInteract(player, hand);
@@ -280,35 +281,53 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     }
 
     //Spawning
-    public static boolean canSpawn(EntityType<DirewolfEntity> entityType, ServerLevelAccessor world, MobSpawnType mobSpawnType, BlockPos pos, RandomSource randomSource) {
-        return world.getBlockState(pos.below()).is(BlockTags.WOLVES_SPAWNABLE_ON) && Animal.isBrightEnoughToSpawn(world, pos);
+    public static boolean canSpawn(EntityType<? extends Mob> entityType, ServerLevelAccessor world, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
+        return world.getBlockState(pos.below()).is(BlockTags.WOLVES_SPAWNABLE_ON) && isMoonPhaseToSpawn(world) && isDarkEnoughToSpawn(world, pos, random);
     }
 
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor levelAccessor, DifficultyInstance instance, MobSpawnType spawnType, @Nullable SpawnGroupData groupData, @Nullable CompoundTag tag) {
-        DirewolfEntity.Variant variant = DirewolfEntity.Variant.byId(this.randomVariant(0, 4));
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance instance, MobSpawnType spawnType, @Nullable SpawnGroupData groupData, @Nullable CompoundTag tag) {
+        Variant variant;
+
+        if (world.getLevel().getMoonPhase() == 0) {
+            variant = Variant.byId(this.randomVariant(0, 2));
+        } else if (world.getLevel().getMoonPhase() == 4) {
+            variant = Variant.byId(this.randomVariant(3, 4));
+        } else {
+            variant = Variant.byId(this.randomVariant(0, 4));
+        }
         setVariant(variant);
 
-        return super.finalizeSpawn(levelAccessor, instance, spawnType, groupData, tag);
+        return super.finalizeSpawn(world, instance, spawnType, groupData, tag);
     }
 
-/*    protected static boolean isBrightEnoughToSpawn(BlockAndTintGetter blockLight, BlockPos pos) {
-        return blockLight.getRawBrightness(pos, 0) < 8;
-    }*/
+    public static boolean isMoonPhaseToSpawn(ServerLevelAccessor world) {
+        if (world.getLevel().getMoonPhase() == 0 || world.getLevel().getMoonPhase() == 4) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-/*    public static boolean isDarkEnoughToSpawn(ServerLevelAccessor level, BlockPos pos, RandomSource random) {
-        if (level.getBrightness(LightLayer.SKY, pos) > random.nextInt(32)) {
+    public static boolean isDarkEnoughToSpawn(ServerLevelAccessor world, BlockPos pos, RandomSource random) {
+        if (world.getBrightness(LightLayer.SKY, pos) > random.nextInt(32)) {
             return false;
         } else {
-            DimensionType dimensiontype = level.dimensionType();
+            DimensionType dimensiontype = world.dimensionType();
             int i = dimensiontype.monsterSpawnBlockLightLimit();
-            if (i < 15 && level.getBrightness(LightLayer.BLOCK, pos) > i) {
+            if (i < 15 && world.getBrightness(LightLayer.BLOCK, pos) > i) {
                 return false;
             } else {
-                int j = level.getLevel().isThundering() ? level.getMaxLocalRawBrightness(pos, 10) : level.getMaxLocalRawBrightness(pos);
+                int j = world.getLevel().isThundering() ? world.getMaxLocalRawBrightness(pos, 10) : world.getMaxLocalRawBrightness(pos);
                 return j <= dimensiontype.monsterSpawnLightTest().sample(random);
             }
         }
-    }*/
+
+    }
+
+    public boolean removeWhenFarAway(double p_34559_) {
+        return !this.isPersistenceRequired();
+    }
+
 
     //Mountable
     protected void positionRider(Entity entity, Entity.MoveFunction move) {
