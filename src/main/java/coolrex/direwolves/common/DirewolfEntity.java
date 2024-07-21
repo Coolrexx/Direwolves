@@ -3,6 +3,7 @@ package coolrex.direwolves.common;
 import coolrex.direwolves.common.goals.DirewolfMeleeAttackGoal;
 import coolrex.direwolves.common.goals.RiddenFloatGoal;
 import coolrex.direwolves.registry.DirewolvesEntities;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -283,6 +284,8 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
             variant = Variant.byId(this.randomVariant(0, 2));
         } else if (world.getLevel().getMoonPhase() == 4) {
             variant = Variant.byId(this.randomVariant(3, 4));
+        } else if (spawnType == MobSpawnType.SPAWN_EGG){
+            variant = Variant.byId(this.randomVariant(0, 4));
         } else {
             variant = Variant.byId(this.randomVariant(0, 4));
         }
@@ -366,16 +369,22 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
             if (this.isJumping()) {
                 moveSpeed = 0.1;
             } else {
+                if (this.isSprinting) {
+                    moveSpeed = 0.2;
+                } else
                 moveSpeed = 0.05;
             }
             this.setDeltaMovement(this.getDeltaMovement().add(moveX * moveSpeed, 0, moveZ * moveSpeed));
-        } else if (player.isSprinting()){
-            moveSpeed = 0.35;
+        } else if (Minecraft.getInstance().options.keySprint.isDown()){
+            moveSpeed = 0.8;
             this.setIsSprinting(true);
             this.setDeltaMovement(this.getDeltaMovement().add(moveX * moveSpeed, 0, moveZ * moveSpeed));
         } else {
             moveSpeed = 0.2;
             this.setDeltaMovement(this.getDeltaMovement().add(moveX * moveSpeed, 0, moveZ * moveSpeed));
+            if (!Minecraft.getInstance().options.keySprint.isDown() && this.isSprinting) {
+                this.setIsSprinting(false);
+            }
         }
 
         if (this.onGround()) {
