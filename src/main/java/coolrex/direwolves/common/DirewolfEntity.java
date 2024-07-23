@@ -173,7 +173,8 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
         }
     }
 
-    //Data woohoo
+
+    //region Data
     public void setAttacking(boolean attacking) {
         this.entityData.set(ATTACKING, attacking);
     }
@@ -271,8 +272,10 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
         int variant = random.nextInt((max - min) + 1) + min;
         return variant;
     }
+    //endregion
 
-    //Spawning
+
+    //region Spawning
     public static boolean canSpawn(EntityType<? extends Mob> entityType, ServerLevelAccessor world, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
         return world.getBlockState(pos.below()).is(BlockTags.WOLVES_SPAWNABLE_ON) && isMoonPhaseToSpawn(world) && isDarkEnoughToSpawn(world, pos, random);
     }
@@ -311,7 +314,10 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
             if (i < 15 && world.getBrightness(LightLayer.BLOCK, pos) > i) {
                 return false;
             } else {
-                int j = world.getLevel().isThundering() ? world.getMaxLocalRawBrightness(pos, 10) : world.getMaxLocalRawBrightness(pos);
+                if (world.getLevel().isThundering()) {
+                    return false;
+                }
+                int j = world.getMaxLocalRawBrightness(pos);
                 return j <= dimensiontype.monsterSpawnLightTest().sample(random);
             }
         }
@@ -321,9 +327,10 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     public boolean removeWhenFarAway(double p_34559_) {
         return !this.isPersistenceRequired();
     }
+    //endregion
 
 
-    //Mountable
+    //region Mountable
     protected void positionRider(Entity entity, Entity.MoveFunction move) {
         super.positionRider(entity, move);
     }
@@ -394,6 +401,17 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
             }
             this.setPlayerJump(false);
         }
+
+        if (this.wasTouchingWater) {
+            this.setIsJumping(false);
+            if (!this.isJumping() && this.isUnderWater()) {
+                this.executeRidersJump(0.2D);
+            }
+            if (this.playerJump() && this.isInWater()) {
+                this.executeRidersJump(0.4D);
+            }
+            this.setPlayerJump(false);
+        }
     }
 
     protected Vec2 getRiddenRotation(LivingEntity entity) {
@@ -427,9 +445,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
 
     @Override
     public void onPlayerJump(int power) {
-        if (power < 0) {
-            power = 0;
-        } else if (power > 0) {
+        if (power > 0) {
             this.setPlayerJump(true);
         }
     }
@@ -447,8 +463,10 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     @Override
     public void handleStopJump() {
     }
+    //endregion
+
     
-    //Damage
+    //region Damage
     public boolean hurt(DamageSource damageSource, float f) {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
@@ -492,10 +510,12 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     }
 
     protected int calculateFallDamage(float entity, float damage) {
-        return Mth.ceil((entity * 0.5F - 3.0F) * damage);
+        return Mth.ceil((entity * 0.5F - 4.0F) * damage);
     }
+    //endregion
 
-    //NeutralMob
+
+    //region NeutralMob
     @Override
     public int getRemainingPersistentAngerTime() {
         return this.entityData.get(REMAINING_ANGER_TIME);
@@ -547,8 +567,10 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
 
         return flag;
     }
+    //endregion
 
-    //Animations
+
+    //region Animations
     public final AnimationState idleAnimationState = new AnimationState();
     private int idleAnimationTimeout = 0;
     public final AnimationState sitAnimationState = new AnimationState();
@@ -656,8 +678,10 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
             return SoundEvents.WOLF_AMBIENT;
         }
     }
+    //endregion
 
-    //Sounds
+
+    //region Sounds
     protected SoundEvent getHurtSound(DamageSource source) {
         return SoundEvents.WOLF_HURT;
     }
@@ -678,4 +702,5 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     public float getVoicePitch() {
         return (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.73F;
     }
+    //endregion
 }
