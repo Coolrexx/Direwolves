@@ -14,7 +14,7 @@ public class RiddenFloatGoal extends FloatGoal {
     }
 
     public boolean canUse() {
-        return this.mob.isInWater() && this.mob.getFluidTypeHeight(ForgeMod.WATER_TYPE.get()) > this.mob.getFluidJumpThreshold() || this.mob.isInLava() || this.mob.isInFluidType((fluidType, height) -> this.mob.canSwimInFluidType(fluidType) && height > this.mob.getFluidJumpThreshold());
+        return this.mob.isVehicle() && this.mob.isInWater() && this.mob.getFluidTypeHeight(ForgeMod.WATER_TYPE.get()) > this.mob.getEyeHeight();
     }
 
     public boolean requiresUpdateEveryTick() {
@@ -23,9 +23,7 @@ public class RiddenFloatGoal extends FloatGoal {
 
     public void tick() {
         if (this.mob.getRandom().nextFloat() < 0.8F) {
-            this.mob.hasImpulse = true;
-            net.minecraftforge.common.ForgeHooks.onLivingJump(mob);
+            this.mob.executeRidersJump(0.2D);
         }
-
     }
 }

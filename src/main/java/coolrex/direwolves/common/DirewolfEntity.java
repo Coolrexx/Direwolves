@@ -63,7 +63,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
 
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new RiddenFloatGoal(this));
+        //this.goalSelector.addGoal(1, new RiddenFloatGoal(this));
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(2, new ClimbOnTopOfPowderSnowGoal(this, this.level()));
         this.goalSelector.addGoal(2, new LookAtPlayerGoal(this, Player.class, 6.0F));
@@ -404,7 +404,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
 
         if (this.wasTouchingWater) {
             this.setIsJumping(false);
-            if (!this.isJumping() && this.isUnderWater()) {
+            if (!this.isJumping() && this.isUnderWater() && getRandom().nextFloat() < 0.8F) {
                 this.executeRidersJump(0.2D);
             }
             if (this.playerJump() && this.isInWater()) {
@@ -434,7 +434,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
         return new Vec3(moveX, 0, moveZ);
     }
 
-    protected void executeRidersJump(Double jumpVec) {
+    public void executeRidersJump(Double jumpVec) {
         Vec3 vec3 = this.getDeltaMovement();
         this.setIsJumping(true);
         this.hasImpulse = true;
