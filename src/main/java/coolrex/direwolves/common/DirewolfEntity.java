@@ -1,6 +1,7 @@
 package coolrex.direwolves.common;
 
 import coolrex.direwolves.common.goals.DirewolfMeleeAttackGoal;
+import coolrex.direwolves.common.goals.DirewolfTameGoal;
 import coolrex.direwolves.common.goals.RiddenFloatGoal;
 import coolrex.direwolves.registry.DirewolvesEntities;
 import net.minecraft.client.Minecraft;
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.*;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.player.Player;
@@ -40,16 +42,20 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerRideableJumping {
     private static final EntityDataAccessor<Integer> REMAINING_ANGER_TIME = SynchedEntityData.defineId(DirewolfEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(DirewolfEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> ATTACKING = SynchedEntityData.defineId(DirewolfEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> EATING = SynchedEntityData.defineId(DirewolfEntity.class, EntityDataSerializers.BOOLEAN);
     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     @Nullable
     private UUID persistentAngerTarget;
@@ -65,6 +71,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
         this.goalSelector.addGoal(0, new FloatGoal(this));
         //this.goalSelector.addGoal(1, new RiddenFloatGoal(this));
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(1, new DirewolfTameGoal(this, 1.0D));
         this.goalSelector.addGoal(2, new ClimbOnTopOfPowderSnowGoal(this, this.level()));
         this.goalSelector.addGoal(2, new LookAtPlayerGoal(this, Player.class, 6.0F));
         this.goalSelector.addGoal(2, new DirewolfMeleeAttackGoal(this, 1.75D, true));
@@ -116,6 +123,8 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     make direwolf float/swim in water while mounted rather than sink
     finalise spawning biomes
     make direwolves spawn with a wolf pack rarely
+    make direwolves aggressive by default
+    polish taming - make direwolf stop when head is at food item, stop from deleting every item, add particles to indicate success/fail
     */
 
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
@@ -148,7 +157,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
                 //interaction does nothing?
                 return interactionresult;
             }
-        } else {
+        } /*else {
             //not tamed
             if (stack.is(Items.BONE) && !this.isAngry()) {
                 if (!player.getAbilities().instabuild) {
@@ -170,11 +179,18 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
             } else {
                 return interactionresult;
             }
-        }
+        }*/
+        return interactionresult;
     }
 
 
     //region Data
+    public void setEating(boolean eating) {
+        this.entityData.set(EATING, eating);
+    }
+
+    public boolean isEating(){return this.entityData.get(EATING);}
+
     public void setAttacking(boolean attacking) {
         this.entityData.set(ATTACKING, attacking);
     }
@@ -230,6 +246,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
         this.entityData.define(REMAINING_ANGER_TIME, 0);
         this.entityData.define(VARIANT, 0);
         this.entityData.define(ATTACKING, false);
+        this.entityData.define(EATING, false);
     }
 
     public void aiStep() {
@@ -583,11 +600,13 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     private int scratchIdleTimeout = 0;
     public final AnimationState laydownIdleState = new AnimationState();
     private int laydownIdleTimeout = 0;
+    public final AnimationState eatAnimationState = new AnimationState();
+    public int eatAnimationTimeout = 0;
 
     @Override
     public void tick() {
-        super.tick();
 
+        super.tick();
         if (this.level().isClientSide()) {
             setupAnimationStates();
         }
@@ -654,6 +673,17 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
             }
         } else {
             this.attackAnimationState.stop();
+        }
+
+        if (this.isEating()) {
+            if (this.eatAnimationTimeout <= 0) {
+                this.eatAnimationTimeout = 160;
+                this.eatAnimationState.start(this.tickCount);
+            } else {
+                --this.eatAnimationTimeout;
+            }
+        } else {
+            this.eatAnimationState.stop();
         }
     }
 

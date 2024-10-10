@@ -124,6 +124,7 @@ public class DirewolfModel<T extends DirewolfEntity> extends HierarchicalModel<T
         this.animate(((DirewolfEntity)entity).attackAnimationState, DirewolfAnimations.attack, ageInTicks, 1.0f);
         this.animate(((DirewolfEntity)entity).scratchIdleState, DirewolfAnimations.ninni_scratch, ageInTicks, 1.0f);
         this.animate(((DirewolfEntity)entity).laydownIdleState, DirewolfAnimations.ninni_laydown, ageInTicks, 1.0f);
+        this.animate(((DirewolfEntity)entity).eatAnimationState, DirewolfAnimations.eat, ageInTicks, 1.0f);
     }
 
     public void applyTailRotation (T entity) {
