@@ -124,7 +124,7 @@ public class DirewolfEntity extends TamableAnimal implements NeutralMob, PlayerR
     finalise spawning biomes
     make direwolves spawn with a wolf pack rarely
     make direwolves aggressive by default
-    polish taming - make direwolf stop when head is at food item, stop from deleting every item, add particles to indicate success/fail
+    polish taming
     */
 
     public InteractionResult mobInteract(Player player, InteractionHand hand) {

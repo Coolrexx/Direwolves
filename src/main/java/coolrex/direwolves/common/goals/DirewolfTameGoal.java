@@ -12,6 +12,17 @@ import java.util.List;
 import java.util.Random;
 
 public class DirewolfTameGoal extends Goal {
+    /*TODO:
+     fine tune stopping at food (pretty good as is though)
+     fix animation timing mismatch (food should be consumed when animation ends or maybe a bit before)
+     make direwolf eat 1 item at a time
+     add cooldown for eating
+     add particles to indicate success/fail & eating item
+
+     multiple items around direwolf breaks its pathing after its eaten one (potentially before too?), may be fixed with cooldown implementation
+     direwolf gets stuck eating if an item is just outside eating radius but close enough to trigger
+     hates jumping when trying to path to an item for some reason
+     */
     private final DirewolfEntity direwolf;
     private final double speedTowardsTarget;
     private Path path;
@@ -46,7 +57,7 @@ public class DirewolfTameGoal extends Goal {
                 if (this.path != null) {
                     return true;
                 } else {
-                    return this.direwolf.distanceTo(foodItem) < 5.0D;
+                    return this.direwolf.distanceToSqr(this.foodItem) <= 7.0;
                 }
             } else {
                 return false;
@@ -60,7 +71,7 @@ public class DirewolfTameGoal extends Goal {
 
     public void start() {
         this.direwolf.getNavigation().moveTo(this.path, this.speedTowardsTarget);
-        this.direwolf.getLookControl().setLookAt(foodItem.getX(), foodItem.getEyeY(), foodItem.getZ());
+        this.direwolf.getLookControl().setLookAt(this.foodItem);
         animDelay = 160;
     }
 
@@ -72,19 +83,17 @@ public class DirewolfTameGoal extends Goal {
     }
 
     public void tick() {
-        if (this.foodItem == null) return;
+        if (this.foodItem == null || !this.foodItem.isAlive()) return;
         Player player = (Player) foodItem.getOwner();
 
-        if (this.direwolf.distanceTo(foodItem) < 1.5D) {
+        if (this.direwolf.distanceToSqr(this.foodItem) <= 2.0) {
+            this.direwolf.getNavigation().stop();
             this.direwolf.setEating(true);
+            this.direwolf.getLookControl().setLookAt(foodItem.getX(), direwolf.getEyeY() - 0.2, foodItem.getZ());
             --animDelay;
             if (animDelay <= 0) {
-                int remainingItems = foodItem.getItem().getCount();
-                if (remainingItems > 1) {
-                    foodItem.getItem().shrink(1);
-                } else {
-                    foodItem.discard();
-                }
+                foodItem.getItem().shrink(1);
+                this.direwolf.playSound(SoundEvents.GENERIC_EAT, 1.0F, 1.0F);
 
                 this.direwolf.setEating(false);
                 this.attemptTaming(player);
